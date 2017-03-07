@@ -1,3 +1,81 @@
 {
-  "dependencies": []
+  "dependencies": [
+    {
+      "name": "abe",
+      "type": "git",
+      "dir": null,
+      "ref": "cf46a25",
+      "url": "git@github.com:abedev/abe"
+    },
+    {
+      "name": "doom",
+      "type": "git",
+      "dir": null,
+      "ref": "bd4956a",
+      "url": "git@github.com:fponticelli/doom"
+    },
+    {
+      "name": "dots",
+      "type": "git",
+      "dir": null,
+      "ref": "35872d0",
+      "url": "git@github.com:fponticelli/dots"
+    },
+    {
+      "name": "express",
+      "type": "git",
+      "dir": null,
+      "ref": "a7bfbbc",
+      "url": "git@github.com:abedev/hxexpress"
+    },
+    {
+      "name": "hxnodejs",
+      "type": "git",
+      "dir": null,
+      "ref": "19a1e2b",
+      "url": "git@github.com:HaxeFoundation/hxnodejs"
+    },
+    {
+      "name": "jsrequire",
+      "type": "git",
+      "dir": null,
+      "ref": "e1c1141",
+      "url": "git@github.com:abedev/jsrequire"
+    },
+    {
+      "name": "lies",
+      "type": "git",
+      "dir": null,
+      "ref": "a2a53d5",
+      "url": "git@github.com:fponticelli/lies"
+    },
+    {
+      "name": "npm",
+      "type": "git",
+      "dir": null,
+      "ref": "6100064",
+      "url": "git@github.com:abedev/npm"
+    },
+    {
+      "name": "thx.core",
+      "type": "git",
+      "dir": null,
+      "ref": "ac52fcd",
+      "url": "git@github.com:fponticelli/thx.core"
+    },
+    {
+      "name": "thx.promise",
+      "type": "git",
+      "dir": null,
+      "ref": "65379a9",
+      "url": "git@github.com:fponticelli/thx.promise"
+    },
+    {
+      "name": "utest",
+      "type": "git",
+      "dir": null,
+      "ref": "0b96b9d",
+      "url": "git@github.com:fponticelli/utest"
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+-lib abe
+-lib doom
+-lib dots
+-lib express
+-lib hxnodejs
+-lib jsrequire
+-lib lies
+-lib npm
+-lib thx.core
+-lib thx.promise
+-cp src
+
+--each
+
+-main ohm.server.Main
+-js bin/server.js
+
+--next
+
+-main ohm.client.Main
+-js bin/public/client.js
+
+--next
+
+-lib utest
+-cp test
+-main ohm.TestAll
+-js bin/test.js
+-cmd node bin/test.js
