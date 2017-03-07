@@ -1,0 +1,8 @@
+# git
+*.orig
+
+# Node.js
+node_modules
+
+# Haxe
+.haxelib
