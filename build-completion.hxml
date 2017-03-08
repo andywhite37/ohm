@@ -1,0 +1,16 @@
+-lib abe
+-lib doom
+-lib dots
+-lib express
+-lib hxnodejs
+-lib jsrequire
+-lib lies
+-lib npm
+-lib thx.core
+-lib thx.promise
+-lib thx.stream
+-lib utest
+-cp src
+-cp test
+--no-output
+-js _

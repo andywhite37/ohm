@@ -11,7 +11,7 @@
       "name": "doom",
       "type": "git",
       "dir": null,
-      "ref": "bd4956a",
+      "ref": "f7dc261",
       "url": "git@github.com:fponticelli/doom"
     },
     {
@@ -69,6 +69,13 @@
       "dir": null,
       "ref": "65379a9",
       "url": "git@github.com:fponticelli/thx.promise"
+    },
+    {
+      "name": "thx.stream",
+      "type": "git",
+      "dir": null,
+      "ref": "bf4520c",
+      "url": "git@github.com:fponticelli/thx.stream"
     },
     {
       "name": "utest",

@@ -7,4 +7,4 @@ copy-client-assets:
 	cp -r src/ohm/client/public bin
 
 run: build copy-client-assets
-	node bin/server.js
+	nodemon bin/server.js
