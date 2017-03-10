@@ -1,20 +1,26 @@
 package ohm.client;
 
-import ohm.common.state.Game;
-import ohm.common.state.User;
+import ohm.common.model.Game;
+import ohm.common.model.User;
 import ohm.client.error.LoadError;
 import ohm.client.state.Address;
 
 enum Action {
   GoTo(address : Address);
 
-  LoadUsers;
-  LoadUsersSuccess(users : Array<User>);
-  LoadUsersFailure(error : LoadError);
+  GetUsers;
+  GetUsersSuccess(users : Array<User>);
+  GetUsersFailure(error : String);
 
-  LoadGames;
-  LoadGamesSuccess(games : Array<Game>);
-  LoadGamesFailure(error : LoadError);
+  CreateUser(name : String);
+  CreateUserSuccess(user : User);
+  CreateUserFailure(name : String, error : String);
+
+  GetGames;
+  GetGamesSuccess(games : Array<Game>);
+  GetGamesFailure(error : String);
 
   CreateGame(name : String);
+  CreateGameSuccess(game : Game);
+  CreateGameFailure(name : String, error : String);
 }

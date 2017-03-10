@@ -71,6 +71,13 @@
       "url": "git@github.com:fponticelli/thx.promise"
     },
     {
+      "name": "thx.schema",
+      "type": "git",
+      "dir": null,
+      "ref": "8f5c04c",
+      "url": "git@github.com:nuttycom/thx.schema"
+    },
+    {
       "name": "thx.stream",
       "type": "git",
       "dir": null,

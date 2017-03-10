@@ -1,5 +1,7 @@
 package ohm.client.state;
 
+import haxe.ds.Option;
+
 import ohm.client.view.AppView;
 import ohm.client.view.LobbyView;
 
@@ -11,7 +13,7 @@ class State {
   }
 
   public static function init() : State {
-    return new State(Lobby(new LobbyViewData(Idle, Idle)));
+    return new State(Lobby(new LobbyViewData(Idle, Idle, Idle)));
   }
 
   public function withViewState(viewState : ViewState) : State {

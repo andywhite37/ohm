@@ -1,9 +1,9 @@
-package ohm.client.api;
+package ohm.client.service;
 
 import thx.promise.Promise;
 
-import ohm.common.state.Game;
-import ohm.common.state.User;
+import ohm.common.model.Game;
+import ohm.common.model.User;
 
 interface IApiClient {
   function getUsers() : Promise<Array<User>>;

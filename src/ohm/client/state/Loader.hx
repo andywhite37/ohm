@@ -6,5 +6,5 @@ enum Loader<T> {
   Idle;
   Loading;
   Loaded(data : T);
-  Failed(error : LoadError);
+  Failed(message : String);
 }

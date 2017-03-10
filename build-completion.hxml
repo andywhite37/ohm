@@ -8,6 +8,7 @@
 -lib npm
 -lib thx.core
 -lib thx.promise
+-lib thx.schema
 -lib thx.stream
 -lib utest
 -cp src
