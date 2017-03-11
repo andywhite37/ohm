@@ -19,6 +19,7 @@ import ohm.common.model.User;
 import ohm.common.util.Serializer;
 
 import ohm.server.service.ClientMessageHandler;
+import ohm.server.service.IClientMessageHandler;
 import ohm.server.service.InMemoryRepository;
 import ohm.server.service.IRepository;
 import ohm.server.service.ISocketClient;
@@ -26,7 +27,7 @@ import ohm.server.service.IOSocketClient;
 
 class Main {
   public static function main() {
-    var port = 8080;
+    var port = 3000;
 
     var app = new Express();
     var server = Http.createServer(cast app);
@@ -42,7 +43,7 @@ class Main {
 
       socket.on('client-message', function(data : String) : Void {
         trace('client-message $data');
-        var handler = new ClientMessageHandler(socketClient, repository);
+        var handler : IClientMessageHandler = new ClientMessageHandler(socketClient, repository);
         handler.handleString(data);
       });
     });
@@ -51,5 +52,4 @@ class Main {
       trace('server listening on $port');
     });
   }
-
 }

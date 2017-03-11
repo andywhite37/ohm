@@ -9,7 +9,7 @@ import ohm.common.model.User;
 import ohm.common.model.Game;
 import ohm.common.util.Serializer;
 
-class ClientMessageHandler {
+class ClientMessageHandler implements IClientMessageHandler {
   var socketClient(default, null) : ISocketClient;
   var repository(default, null) : IRepository;
 
@@ -20,9 +20,8 @@ class ClientMessageHandler {
 
   public function handleString(data : String) : Void {
     switch Serializer.parseString(ClientMessages.schema(), data).either {
-      case Left(errors) : socketClient.sendClient(UnexpectedFailure('failed to parse client message: $data'));
+      case Left(errors) : socketClient.sendClient(UnexpectedFailure('failed to parse client message: $data - ${errors.toArray().join(", ")}'));
       case Right(message) : handleClientMessage(message);
-
     }
   }
 
@@ -31,22 +30,18 @@ class ClientMessageHandler {
 
   public function handleClientMessage(message : ClientMessage) : Void {
     switch message {
-      case Empty: handleEmpty();
-      case CreateUser(name) : handleCreateUser(name);
-      case GetUsers : handleGetUsers();
-      case GetGames : handleGetGames();
-      case CreateGame(gameId) : handleCreateGame(gameId);
-      case JoinGame(gameId, userId) : handleJoinGame(gameId, userId);
-      case LeaveGame(gameId, userId) : handleLeaveGame(gameId, userId);
-      //case RemoveGame(gameId) : handleRemoveGame(gameId);
+      case Empty: // no-op
+      case CreateUser(name) : createUser(name);
+      case GetUsers : getUsers();
+      case GetGames : getGames();
+      case CreateGame(gameId) : createGame(gameId);
+      case JoinGame(gameId, userId) : joinGame(gameId, userId);
+      case LeaveGame(gameId, userId) : leaveGame(gameId, userId);
+      //case RemoveGame(gameId) : removeGame(gameId);
     }
   }
 
-  function handleEmpty() : Promise<Nil> {
-    return Promise.nil;
-  }
-
-  function handleCreateUser(name : String) : Promise<Array<User>> {
+  function createUser(name : String) : Promise<Array<User>> {
     return repository.addUser(name)
       .flatMap(function(user) {
         socketClient.sendClient(CreateUserSuccess(user));
@@ -60,7 +55,7 @@ class ClientMessageHandler {
       });
   }
 
-  function handleGetUsers() : Promise<Array<User>> {
+  function getUsers() : Promise<Array<User>> {
     return repository.getUsers()
       .success(function(users) {
         socketClient.sendClient(UsersUpdate(users));
@@ -70,7 +65,7 @@ class ClientMessageHandler {
       });
   }
 
-  function handleGetGames() : Promise<Array<Game>> {
+  function getGames() : Promise<Array<Game>> {
     return repository.getGames()
       .success(function(games) {
         socketClient.sendClient(GamesUpdate(games));
@@ -80,7 +75,7 @@ class ClientMessageHandler {
       });
   }
 
-  function handleCreateGame(name : String) : Promise<Array<Game>> {
+  function createGame(name : String) : Promise<Array<Game>> {
     return repository.addGame(name)
       .flatMap(function(game : Game) {
         socketClient.sendClient(CreateGameSuccess(game));
@@ -94,7 +89,7 @@ class ClientMessageHandler {
       });
   }
 
-  function handleJoinGame(gameId : GameId, userId : UserId) : Promise<Game> {
+  function joinGame(gameId : GameId, userId : UserId) : Promise<Game> {
     return repository.joinGame(gameId, userId)
       .success(function(game : Game) {
         socketClient.joinRoom(gameId.toString());
@@ -106,7 +101,7 @@ class ClientMessageHandler {
       });
   }
 
-  function handleLeaveGame(gameId : GameId, userId : UserId) : Promise<Game> {
+  function leaveGame(gameId : GameId, userId : UserId) : Promise<Game> {
     return repository.leaveGame(gameId, userId)
       .success(function(game : Game) {
         socketClient.leaveRoom(gameId.toString());
