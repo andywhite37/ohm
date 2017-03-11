@@ -15,25 +15,43 @@ import ohm.common.model.User;
 enum ServerMessage {
   Empty;
 
-  Users(users : Array<User>);
+  UnexpectedFailure(message : String);
+
+  UsersUpdate(users : Array<User>);
+  GetUsersFailure(message : String);
   CreateUserSuccess(user : User);
   CreateUserFailure(name : String, message : String);
 
-  Games(games : Array<Game>);
+  GamesUpdate(games : Array<Game>);
+  GetGamesFailure(message : String);
   CreateGameSuccess(game : Game);
   CreateGameFailure(name : String, message : String);
+  JoinGameSuccess(game : Game);
+  JoinGameFailure(message : String);
+  LeaveGameSuccess(game : Game);
+  LeaveGameFailure(message : String);
+  GameUpdate(game : Game);
 }
 
 class ServerMessages {
   public static function schema<E>() : Schema<E, ServerMessage> {
     return oneOf([
       emptySchema(),
-      usersSchema(),
+
+      unexpectedFailureSchema(),
+
+      usersUpdateSchema(),
       createUserSuccessSchema(),
-      createUserFailureSchema(),
-      //gamesSchema(),
+      createUserFailureSchema()
+
+      //gamesUpdateSchema(),
       //createGameSuccessSchema(),
       //createGameFailureSchema()
+      //joinGameSuccessSchema(),
+      //joinGameFailureSchema()
+      //leaveGameSuccessSchema(),
+      //leaveGameFailureSchema()
+      //gameUpdateSchema()
     ]);
   }
 
@@ -41,17 +59,34 @@ class ServerMessages {
     return constEnum("empty", Empty);
   }
 
-  static function usersSchema() {
+  static function unexpectedFailureSchema() {
+    return alt(
+      "error",
+      object(ap1(
+        function(message : String) return { message: message },
+        required("message", string(), function(v : { message: String }) return v.message)
+      )),
+      function(v : { message: String }) return UnexpectedFailure(v.message),
+      function(message : ServerMessage) {
+        return switch message {
+          case UnexpectedFailure(message) : Some({ message: message });
+          case _ : None;
+        };
+      }
+    );
+  }
+
+  static function usersUpdateSchema() {
     return alt(
       "users",
       object(ap1(
         function(users : Array<User>) return { users: users },
         required("users", array(User.schema()), function(v : { users: Array<User> }) return v.users)
       )),
-      function(v : { users: Array<User> }) return Users(v.users),
+      function(v : { users: Array<User> }) return UsersUpdate(v.users),
       function(message : ServerMessage) {
         return switch message {
-          case Users(users) : Some({ users: users });
+          case UsersUpdate(users) : Some({ users: users });
           case _ : None;
         };
       }

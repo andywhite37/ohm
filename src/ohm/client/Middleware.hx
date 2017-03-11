@@ -9,9 +9,10 @@ import ohm.common.message.ClientMessage;
 import ohm.common.message.ServerMessage;
 
 import ohm.client.Action;
+import ohm.client.error.LoadError;
 import ohm.client.service.IApiClient;
 import ohm.client.service.ISocketClient;
-import ohm.client.error.LoadError;
+using ohm.client.state.Address;
 import ohm.client.state.State;
 
 class Middleware {
@@ -24,20 +25,37 @@ class Middleware {
   }
 
   public function init() : StreamMiddleware<State, Action> {
-    return empty() + socketMiddleware;
+    return empty() + dataRequestMiddleware + socketMiddleware;
   }
 
   function onServerMessage(message : ServerMessage, dispatch : Action -> Void) : Void {
+    // Propagate server messages as application actions
     switch message {
-      case Empty:
-
-      case Users(users) : dispatch(GetUsersSuccess(users));
+      case Empty: // no-op
+      case UnexpectedFailure(message) : dispatch(UnexpectedFailure(message));
+      case UsersUpdate(users) : dispatch(UsersUpdate(users));
+      case GetUsersFailure(error) : dispatch(GetUsersFailure(error));
       case CreateUserSuccess(user) : dispatch(CreateUserSuccess(user));
       case CreateUserFailure(name, error) : dispatch(CreateUserFailure(name, error));
+      case GamesUpdate(games) : dispatch(GamesUpdate(games));
+      case GetGamesFailure(error) : dispatch(GetGamesFailure(error));
+      case CreateGameSuccess(game) : dispatch(CreateGameSuccess(game));
+      case CreateGameFailure(name, error) : dispatch(CreateGameFailure(name, error));
+      case JoinGameSuccess(game) : dispatch(JoinGameSuccess(game));
+      case JoinGameFailure(error) : dispatch(JoinGameFailure(error));
+      case LeaveGameSuccess(game) : dispatch(LeaveGameSuccess(game));
+      case LeaveGameFailure(error) : dispatch(LeaveGameFailure(error));
+      case GameUpdate(game) : dispatch(GameUpdate(game));
+    }
+  }
 
-      case Games(games) : dispatch(GetGamesSuccess(games));
-      case _ : throw new thx.error.NotImplemented();
-      //case UserJoinedGame(user, game, users) : dispatch(JoinGameSuccess(game));
+  public function dataRequestMiddleware(action : Action, dispatch : Action -> Void) : Void {
+    switch action {
+      case AddressChanged(Lobby) :
+        dispatch(GetUsers);
+        dispatch(GetGames);
+
+      case _ : // no-op
     }
   }
 
@@ -48,39 +66,26 @@ class Middleware {
       socketClient.subscribe(onServerMessage.bind(_, dispatch));
     }
     switch action {
-      case GoTo(Lobby) :
-        dispatch(GetUsers);
-        dispatch(GetGames);
-
-      case GoTo(Unknown(location)) :
-        trace('unknown location: $location');
-
-      case CreateUser(name) :
-        socketClient.send(CreateUser(name));
-
-      case CreateUserSuccess(user) :
-
-      case CreateUserFailure(name, error) :
-
-      case GetUsers :
-        socketClient.send(GetUsers);
-
-      case GetUsersSuccess(_):
-
-      case GetUsersFailure(_):
-
-      case GetGames :
-        socketClient.send(GetGames);
-
-      case GetGamesSuccess(_):
-
-      case GetGamesFailure(_):
-
-      case CreateGame(name) : // TODO
-        socketClient.send(CreateGame(name));
-
-      case CreateGameSuccess(game) :
-      case CreateGameFailure(name, error) :
+      case UnexpectedFailure(_) : // no-op
+      case AddressChanged(Lobby) : // no-op
+      case AddressChanged(Unknown(location)) : // no-op
+      case CreateUser(name) : socketClient.send(CreateUser(name));
+      case CreateUserSuccess(user) : // no-op
+      case CreateUserFailure(name, error) : // no-op
+      case GetUsers : socketClient.send(GetUsers);
+      case UsersUpdate(_): // no-op
+      case GetUsersFailure(_): // no-op
+      case GetGames : socketClient.send(GetGames);
+      case GamesUpdate(_): // no-op
+      case GetGamesFailure(_): // no-op
+      case CreateGame(name) : socketClient.send(CreateGame(name));
+      case CreateGameSuccess(game) : // no-op
+      case CreateGameFailure(name, error) : // no-op
+      case JoinGameSuccess(_) : // no-op
+      case JoinGameFailure(_) : // no-op
+      case LeaveGameSuccess(_) : // no-op
+      case LeaveGameFailure(_) : // no-op
+      case GameUpdate(_) : // no-op
     }
   }
 }

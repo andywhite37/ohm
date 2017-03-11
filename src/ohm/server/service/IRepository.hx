@@ -7,7 +7,11 @@ import ohm.common.model.User;
 
 interface IRepository {
   function getUsers() : Promise<Array<User>>;
-  function addUser(user : User) : Promise<User>;
+  function addUser(name : String) : Promise<User>;
 
   function getGames() : Promise<Array<Game>>;
+  function addGame(name : String) : Promise<Game>;
+
+  function joinGame(gameId : GameId, userId : UserId) : Promise<Game>;
+  function leaveGame(gameId : GameId, userId : UserId) : Promise<Game>;
 }

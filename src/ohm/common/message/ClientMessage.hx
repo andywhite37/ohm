@@ -14,63 +14,112 @@ import ohm.common.model.User;
 
 enum ClientMessage {
   Empty;
-  CreateUser(name : String);
+
   GetUsers;
+  CreateUser(name : String);
+
   GetGames;
   CreateGame(name : String);
-  JoinGame(id : GameId, user : User);
-  RemoveGame(id : GameId);
+  JoinGame(id : GameId, userId : UserId);
+  LeaveGame(id : GameId, userId : UserId);
+  //RemoveGame(id : GameId);
 }
 
 class ClientMessages {
   public static function schema<E>() : Schema<E, ClientMessage> {
     return oneOf([
-      constEnum("empty", Empty),
-      alt(
-        "createUser",
-        object(ap1(
-          function(name : String) return { name: name },
-          required("name", string(), function(v : { name: String }) return v.name)
-        )),
-        function(v : { name: String }) return CreateUser(v.name),
-        function(message : ClientMessage) {
-          return switch message {
-            case CreateUser(name) : Some({ name: name });
-            case _ : None;
-          };
-        }
-      ),
-      constEnum("getUsers", GetUsers),
-      constEnum("getGames", GetGames),
-      alt(
-        "createGame",
-        object(ap1(
-          function(name : String) return { name: name },
-          required("name", string(), function(v : { name : String }) return v.name)
-        )),
-        function(v : { name: String }) return CreateGame(v.name),
-        function(message : ClientMessage) {
-          return switch message {
-            case CreateGame(name) : Some({ name: name });
-            case _ : None;
-          }
-        }
-      ),
-      alt(
-        "joinGame",
-        object(ap2(
-          function(gameId : GameId, user: User) return { gameId: gameId, user: user },
-          required("gameId", Game.gameIdSchema(), function(v : { gameId: GameId, user: User }) return v.gameId),
-          required("user", User.schema(), function(v : { gameId: GameId, user: User }) return v.user)
-        )),
-        function(v : { gameId: GameId, user: User }) return JoinGame(v.gameId, v.user),
-        function(message : ClientMessage) {
-          return switch message {
-            case JoinGame(gameId, user) : Some({ gameId: gameId, user: user });
-            case _ : None;
-          };
-        }
-      )
+      emptySchema(),
+
+      getUsersSchema(),
+      createUserSchema(),
+
+      getGamesSchema(),
+      createGameSchema(),
+      joinGameSchema(),
+      leaveGameSchema(),
+      //removeGameSchema()
     ]);
+  }
+
+  static function emptySchema() {
+    return constEnum("empty", Empty);
+  }
+
+  static function createUserSchema() {
+    return alt(
+      "createUser",
+      object(ap1(
+        function(name : String) return { name: name },
+        required("name", string(), function(v : { name: String }) return v.name)
+      )),
+      function(v : { name: String }) return CreateUser(v.name),
+      function(message : ClientMessage) {
+        return switch message {
+          case CreateUser(name) : Some({ name: name });
+          case _ : None;
+        };
+      }
+    );
+  }
+
+  static function getUsersSchema() {
+    return constEnum("getUsers", GetUsers);
+  }
+
+  static function getGamesSchema() {
+    return constEnum("getGames", GetGames);
+  }
+
+  static function createGameSchema() {
+    return alt(
+      "createGame",
+      object(ap1(
+        function(name : String) return { name: name },
+        required("name", string(), function(v : { name : String }) return v.name)
+      )),
+      function(v : { name: String }) return CreateGame(v.name),
+      function(message : ClientMessage) {
+        return switch message {
+          case CreateGame(name) : Some({ name: name });
+          case _ : None;
+        }
+      }
+    );
+  }
+
+  static function joinGameSchema() {
+    return alt(
+      "joinGame",
+      object(ap2(
+        function(gameId : GameId, userId: UserId) return { gameId: gameId, userId: userId },
+        required("gameId", Game.gameIdSchema(), function(v : { gameId: GameId, userId: UserId }) return v.gameId),
+        required("userId", User.userIdSchema(), function(v : { gameId: GameId, userId: UserId }) return v.userId)
+      )),
+      function(v : { gameId: GameId, userId: UserId }) return JoinGame(v.gameId, v.userId),
+      function(message : ClientMessage) {
+        return switch message {
+          case JoinGame(gameId, userId) : Some({ gameId: gameId, userId: userId });
+          case _ : None;
+        };
+      }
+    );
+  }
+
+  static function leaveGameSchema() {
+    return alt(
+      "leaveGame",
+      object(ap2(
+        function(gameId : GameId, userId: UserId) return { gameId: gameId, userId: userId },
+        required("gameId", Game.gameIdSchema(), function(v : { gameId: GameId, userId: UserId }) return v.gameId),
+        required("userId", User.userIdSchema(), function(v : { gameId: GameId, userId: UserId }) return v.userId)
+      )),
+      function(v : { gameId: GameId, userId: UserId }) return LeaveGame(v.gameId, v.userId),
+      function(message : ClientMessage) {
+        return switch message {
+          case LeaveGame(gameId, userId) : Some({ gameId: gameId, userId: userId });
+          case _ : None;
+        };
+      }
+    );
   }
 }

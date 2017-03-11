@@ -6,10 +6,12 @@ import ohm.client.error.LoadError;
 import ohm.client.state.Address;
 
 enum Action {
-  GoTo(address : Address);
+  UnexpectedFailure(message : String);
+
+  AddressChanged(address : Address);
 
   GetUsers;
-  GetUsersSuccess(users : Array<User>);
+  UsersUpdate(users : Array<User>);
   GetUsersFailure(error : String);
 
   CreateUser(name : String);
@@ -17,10 +19,20 @@ enum Action {
   CreateUserFailure(name : String, error : String);
 
   GetGames;
-  GetGamesSuccess(games : Array<Game>);
+  GamesUpdate(games : Array<Game>);
   GetGamesFailure(error : String);
 
   CreateGame(name : String);
   CreateGameSuccess(game : Game);
   CreateGameFailure(name : String, error : String);
+
+  //JoinGame(game : Game, user : User);
+  JoinGameSuccess(game : Game);
+  JoinGameFailure(error : String);
+
+  //LeaveGame(game : Game, user : User);
+  LeaveGameSuccess(game : Game);
+  LeaveGameFailure(error : String);
+
+  GameUpdate(game : Game);
 }

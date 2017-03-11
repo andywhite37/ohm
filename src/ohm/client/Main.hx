@@ -1,5 +1,7 @@
 package ohm.client;
 
+import js.Browser;
+
 import thx.stream.Property;
 import thx.stream.Store;
 
@@ -34,12 +36,8 @@ class Main {
     );
 
     js.Browser.window.onhashchange = function(e : js.html.Event) : Void {
-      goTo(store, js.Browser.location);
+      store.dispatch(AddressChanged(Addresses.fromLocation(Browser.location)));
     }
-    goTo(store, js.Browser.location);
-  }
-
-  static function goTo(store : Store<State, Action>, location : js.html.Location) : Void {
-    store.dispatch(GoTo(Addresses.fromLocation(location)));
+    store.dispatch(AddressChanged(Addresses.fromLocation(Browser.location)));
   }
 }

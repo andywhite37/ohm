@@ -5,6 +5,7 @@ import haxe.ds.Option;
 using thx.Arrays;
 using thx.Functions;
 using thx.Options;
+using thx.Strings;
 
 import doom.core.VNode;
 import doom.core.VNodes;
@@ -52,7 +53,8 @@ class LobbyView {
         }
       ]),
       button([
-        "type" => "submit"
+        "type" => "submit",
+        "disabled" => name.isEmpty()
       ], "Register")
     ]);
   }

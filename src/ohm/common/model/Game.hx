@@ -23,7 +23,7 @@ abstract GameId(String) {
 class Game {
   public var id(default, null) : GameId;
   public var name(default, null) : String;
-  public var users(default, null) : Array<User>;
+  public var users(default, default) : Array<User>;
 
   public function new(id : GameId, name : String, users : Array<User>) {
     this.id = id;

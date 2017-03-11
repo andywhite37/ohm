@@ -10,26 +10,35 @@ import ohm.client.view.LobbyView;
 class Reducer {
   public static function reduce(state : State, action : Action) : State {
     return switch action {
-      case GoTo(address) : goTo(state, address);
+      case UnexpectedFailure(message) : state; // TODO
+
+      case AddressChanged(address) : addressChanged(state, address);
 
       case CreateUser(name) : createUser(state, name);
       case CreateUserSuccess(user) : createUserSuccess(state, user);
       case CreateUserFailure(name, error) : createUserFailure(state, name, error);
 
       case GetUsers: getUsers(state);
-      case GetUsersSuccess(users) : getUsersSuccess(state, users);
+      case UsersUpdate(users) : usersUpdate(state, users);
       case GetUsersFailure(error) : getUsersFailure(state, error);
 
       case GetGames : getGames(state);
-      case GetGamesSuccess(games) : getGamesSuccess(state, games);
+      case GamesUpdate(games) : gamesUpdate(state, games);
       case GetGamesFailure(error) : getGamesFailure(state, error);
 
       case CreateGame(name) : createGame(state, name);
-      case _ : throw new thx.error.NotImplemented();
+      case CreateGameSuccess(game) : createGameSuccess(state, game);
+      case CreateGameFailure(name, message) : createGameFailure(state, name, message);
+      case JoinGameSuccess(game) : state; // TODO
+      case JoinGameFailure(error) : state; // TODO
+      case LeaveGameSuccess(game) : state; // TODO
+      case LeaveGameFailure(error) : state; // TODO
+      case GameUpdate(game) : gameUpdate(state, game);
     }
   }
 
-  static function goTo(state : State, address : Address) : State {
+  static function addressChanged(state : State, address : Address) : State {
+    // TODO
     return state;
   }
 
@@ -57,7 +66,7 @@ class Reducer {
     }
   }
 
-  static function getUsersSuccess(state : State, users : Array<User>) : State {
+  static function usersUpdate(state : State, users : Array<User>) : State {
     return switch state.viewState {
       case Lobby(data) : state.withViewState(Lobby(data.withUsersLoader(Loaded(users))));
     }
@@ -75,7 +84,7 @@ class Reducer {
     }
   }
 
-  static function getGamesSuccess(state : State, games : Array<Game>) : State {
+  static function gamesUpdate(state : State, games : Array<Game>) : State {
     return switch state.viewState {
       case Lobby(data) : state.withViewState(Lobby(data.withGamesLoader(Loaded(games))));
     }
@@ -88,6 +97,21 @@ class Reducer {
   }
 
   static function createGame(state : State, name : String) : State {
+    // TODO
+    return state;
+  }
+
+  static function createGameSuccess(state : State, game : Game) : State {
+    // TODO
+    return state;
+  }
+
+  static function createGameFailure(state : State, name : String, message : String) : State {
+    // TODO
+    return state;
+  }
+
+  static function gameUpdate(state : State, game : Game) : State {
     // TODO
     return state;
   }

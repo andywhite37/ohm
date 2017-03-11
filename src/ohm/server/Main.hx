@@ -17,8 +17,12 @@ import ohm.common.message.ServerMessage;
 import ohm.common.model.Game;
 import ohm.common.model.User;
 import ohm.common.util.Serializer;
-import ohm.server.service.IRepository;
+
+import ohm.server.service.ClientMessageHandler;
 import ohm.server.service.InMemoryRepository;
+import ohm.server.service.IRepository;
+import ohm.server.service.ISocketClient;
+import ohm.server.service.IOSocketClient;
 
 class Main {
   public static function main() {
@@ -34,14 +38,12 @@ class Main {
 
     io.on('connection', function(socket : Socket) {
       trace('client connected');
+      var socketClient : ISocketClient = new IOSocketClient(io, socket);
 
       socket.on('client-message', function(data : String) : Void {
         trace('client-message $data');
-
-        switch Serializer.parseString(ClientMessages.schema(), data).either {
-          case Left(errs) : trace('errors parsing client message: ${errs.toArray().join(", ")}');
-          case Right(clientMessage) : handleClientMessage(repository, socket, clientMessage);
-        };
+        var handler = new ClientMessageHandler(socketClient, repository);
+        handler.handleString(data);
       });
     });
 
@@ -50,41 +52,4 @@ class Main {
     });
   }
 
-  static function handleClientMessage(repository: IRepository, socket: Socket, message : ClientMessage) : Void {
-    switch message {
-      case Empty:
-      case CreateUser(name) :
-        trace('creating user $name');
-        repository.addUser(new User(UserId.gen(), name))
-          .flatMap(function(user) {
-            trace('created user $name');
-            var data = Serializer.renderString(ServerMessages.schema(), CreateUserSuccess(user));
-            trace('emit created user');
-            socket.emit('server-message', data);
-            trace('getting users');
-            return repository.getUsers();
-          })
-          .success(function(users) {
-            var data = Serializer.renderString(ServerMessages.schema(), Users(users));
-            trace('emit users');
-            socket.emit('server-message', data);
-            trace('broadcast users');
-            socket.broadcast.emit('server-message', data);
-          });
-      case GetUsers :
-        repository.getUsers().success(function(users) {
-          var data = Serializer.renderString(ServerMessages.schema(), Users(users));
-          socket.emit('server-message', data);
-        });
-      case GetGames :
-        repository.getGames().success(function(games) {
-          var data = Serializer.renderString(ServerMessages.schema(), Games(games));
-          socket.emit('server-message', data);
-        });
-      case CreateGame(gameId) :
-      case JoinGame(gameId, user) :
-      case RemoveGame(gameId) :
-
-    };
-  }
 }

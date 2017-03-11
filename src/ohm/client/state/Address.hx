@@ -12,4 +12,11 @@ class Addresses {
     // TODO: parse hash
     return Lobby;
   }
+
+  public static function toHash(address : Address) : String {
+    return switch address {
+      case Lobby : "lobby";
+      case Unknown(location) : location.hash;
+    }
+  }
 }
