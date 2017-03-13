@@ -37,18 +37,19 @@ class ClientMessageHandler implements IClientMessageHandler {
       case CreateGame(gameId) : createGame(gameId);
       case JoinGame(gameId, userId) : joinGame(gameId, userId);
       case LeaveGame(gameId, userId) : leaveGame(gameId, userId);
-      //case RemoveGame(gameId) : removeGame(gameId);
+      case RemoveGame(gameId) : removeGame(gameId);
+      case StartGame(gameId) : startGame(gameId);
     }
   }
 
   function createUser(name : String) : Promise<Array<User>> {
-    return repository.addUser(name)
+    return repository.createUser(name)
       .flatMap(function(user) {
         socketClient.sendClient(CreateUserSuccess(user));
         return repository.getUsers();
       })
       .success(function(users) {
-        socketClient.sendAll(UsersUpdate(users));
+        socketClient.sendAll(UsersUpdated(users));
       })
       .failure(function(error) {
         socketClient.sendClient(CreateUserFailure(name, 'failed to create user: ${error.message}'));
@@ -58,7 +59,7 @@ class ClientMessageHandler implements IClientMessageHandler {
   function getUsers() : Promise<Array<User>> {
     return repository.getUsers()
       .success(function(users) {
-        socketClient.sendClient(UsersUpdate(users));
+        socketClient.sendClient(UsersUpdated(users));
       })
       .failure(function(error) {
         socketClient.sendClient(GetUsersFailure('failed to get users: ${error.message}'));
@@ -68,7 +69,7 @@ class ClientMessageHandler implements IClientMessageHandler {
   function getGames() : Promise<Array<Game>> {
     return repository.getGames()
       .success(function(games) {
-        socketClient.sendClient(GamesUpdate(games));
+        socketClient.sendClient(GamesUpdated(games));
       })
       .failure(function(error) {
         socketClient.sendClient(GetGamesFailure('failed to get games: ${error.message}'));
@@ -76,13 +77,13 @@ class ClientMessageHandler implements IClientMessageHandler {
   }
 
   function createGame(name : String) : Promise<Array<Game>> {
-    return repository.addGame(name)
+    return repository.createGame(name)
       .flatMap(function(game : Game) {
         socketClient.sendClient(CreateGameSuccess(game));
         return repository.getGames();
       })
       .success(function(games) {
-        socketClient.sendAll(GamesUpdate(games));
+        socketClient.sendAll(GamesUpdated(games));
       })
       .failure(function(error) {
         socketClient.sendClient(CreateGameFailure(name, 'failed to create game: ${error.message}'));
@@ -94,10 +95,10 @@ class ClientMessageHandler implements IClientMessageHandler {
       .success(function(game : Game) {
         socketClient.joinRoom(gameId.toString());
         socketClient.sendClient(JoinGameSuccess(game));
-        socketClient.sendRoomAll(gameId.toString(), GameUpdate(game));
+        socketClient.sendRoomAll(gameId.toString(), GameUpdated(game));
       })
       .failure(function(error) {
-        socketClient.sendClient(JoinGameFailure('failed to join game: ${error.message}'));
+        socketClient.sendClient(JoinGameFailure(gameId, 'failed to join game: ${error.message}'));
       });
   }
 
@@ -106,10 +107,34 @@ class ClientMessageHandler implements IClientMessageHandler {
       .success(function(game : Game) {
         socketClient.leaveRoom(gameId.toString());
         socketClient.sendClient(LeaveGameSuccess(game));
-        socketClient.sendRoomAll(gameId.toString(), GameUpdate(game));
+        socketClient.sendRoomAll(gameId.toString(), GameUpdated(game));
       })
       .failure(function(error) {
-        socketClient.sendClient(LeaveGameFailure('failed to leave game: ${error.message}'));
+        socketClient.sendClient(LeaveGameFailure(gameId, 'failed to leave game: ${error.message}'));
+      });
+  }
+
+  function removeGame(gameId : GameId) : Promise<{ removedGame: Game, games: Array<Game> }> {
+    return repository.removeGame(gameId)
+      .success(function(result : { removedGame: Game, games: Array<Game> }) {
+        socketClient.sendClient(RemoveGameSuccess(result.removedGame));
+        socketClient.sendRoomAll(result.removedGame.id.toString(), GameRemoved(result.removedGame));
+        socketClient.sendAll(GamesUpdated(result.games));
+      })
+      .failure(function(error) {
+        socketClient.sendClient(RemoveGameFailure(gameId, 'failed to remove game: ${error.message}'));
+      });
+  }
+
+  function startGame(gameId : GameId) : Promise<Game> {
+    return repository.startGame(gameId)
+      .success(function(game) {
+        socketClient.sendClient(StartGameSuccess(game));
+        socketClient.sendRoomAll(gameId.toString(), GameStarted(game));
+        socketClient.sendRoomAll(gameId.toString(), GameUpdated(game));
+      })
+      .failure(function(error) {
+        socketClient.sendClient(StartGameFailure(gameId, 'failed to start game: ${error.message}'));
       });
   }
 }

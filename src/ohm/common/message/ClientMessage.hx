@@ -20,9 +20,10 @@ enum ClientMessage {
 
   GetGames;
   CreateGame(name : String);
-  JoinGame(id : GameId, userId : UserId);
-  LeaveGame(id : GameId, userId : UserId);
-  //RemoveGame(id : GameId);
+  JoinGame(gameId : GameId, userId : UserId);
+  LeaveGame(gameId : GameId, userId : UserId);
+  RemoveGame(gameId : GameId);
+  StartGame(gameId : GameId);
 }
 
 class ClientMessages {
@@ -37,7 +38,8 @@ class ClientMessages {
       createGameSchema(),
       joinGameSchema(),
       leaveGameSchema(),
-      //removeGameSchema()
+      removeGameSchema(),
+      startGameSchema()
     ]);
   }
 
@@ -117,6 +119,40 @@ class ClientMessages {
       function(message : ClientMessage) {
         return switch message {
           case LeaveGame(gameId, userId) : Some({ gameId: gameId, userId: userId });
+          case _ : None;
+        };
+      }
+    );
+  }
+
+  static function removeGameSchema() {
+    return alt(
+      "removeGame",
+      object(ap1(
+        function(gameId : GameId) return { gameId: gameId },
+        required("gameId", Game.gameIdSchema(), function(v : { gameId: GameId }) return v.gameId)
+      )),
+      function(v : { gameId: GameId }) return RemoveGame(v.gameId),
+      function(message : ClientMessage) {
+        return switch message {
+          case RemoveGame(gameId) : Some({ gameId: gameId });
+          case _ : None;
+        };
+      }
+    );
+  }
+
+  static function startGameSchema() {
+    return alt(
+      "startGame",
+      object(ap1(
+        function(gameId : GameId) return { gameId: gameId },
+        required("gameId", Game.gameIdSchema(), function(v : { gameId: GameId }) return v.gameId)
+      )),
+      function(v : { gameId: GameId }) return StartGame(v.gameId),
+      function(message : ClientMessage) {
+        return switch message {
+          case StartGame(gameId) : Some({ gameId: gameId });
           case _ : None;
         };
       }

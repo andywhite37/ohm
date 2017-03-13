@@ -22,7 +22,7 @@ class InMemoryRepository implements IRepository {
     return Promise.value(users.values());
   }
 
-  public function addUser(name : String) : Promise<User> {
+  public function createUser(name : String) : Promise<User> {
     return if (users.values().map.fn(_.name).contains(name)) {
       Promise.fail('user $name already exists');
     } else {
@@ -37,7 +37,7 @@ class InMemoryRepository implements IRepository {
     return Promise.value(games.values());
   }
 
-  public function addGame(name : String) : Promise<Game> {
+  public function createGame(name : String) : Promise<Game> {
     return if (games.values().map.fn(_.name).contains(name)) {
       Promise.fail('game $name already exists');
     } else {
@@ -85,6 +85,24 @@ class InMemoryRepository implements IRepository {
     game.users = game.users.filter(function(gameUser) {
       return gameUser.id.toString() != user.id.toString();
     });
+    return Promise.value(game);
+  }
+
+  public function removeGame(gameId : GameId) : Promise<{ removedGame: Game, games: Array<Game> }> {
+    var game = games.get(gameId.toString());
+    if (game == null) {
+      return Promise.fail('no game found for id: ${gameId.toString()}');
+    }
+    games.remove(gameId.toString());
+    return Promise.value({ removedGame: game, games: games.values() });
+  }
+
+  public function startGame(gameId : GameId) : Promise<Game> {
+    var game = games.get(gameId.toString());
+    if (game == null) {
+      return Promise.fail('no game found for ID: ${gameId.toString()}');
+    }
+    //game.gameState = Started;
     return Promise.value(game);
   }
 }

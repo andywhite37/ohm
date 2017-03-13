@@ -21,7 +21,7 @@ enum SocketStatus {
 class IOSocketClient implements ISocketClient {
   var namespace(default, null) : String;
   var status(default, null) : SocketStatus;
-  var listeners: Array<ServerMessage -> Void>;
+  var listeners(default, null): Array<ServerMessage -> Void>;
 
   public function new(?namespace : String = "/") {
     this.namespace = namespace;
@@ -55,6 +55,7 @@ class IOSocketClient implements ISocketClient {
     ifConnected(function(socket) {
       socket.removeAllListeners();
       socket.disconnect();
+      listeners = []; // TODO: should this be done?
       status = Disconnected;
     });
   }
@@ -68,7 +69,7 @@ class IOSocketClient implements ISocketClient {
   function onServerMessage(data : String) : Void {
     switch Serializer.parseString(ServerMessages.schema(), data).either {
       case Left(errors) : trace('failed to parse server message: $data');
-      case Right(message) : notify(message);
+      case Right(message) : notifyListeners(message);
     }
   }
 
@@ -84,7 +85,7 @@ class IOSocketClient implements ISocketClient {
     }
   }
 
-  function notify(message : ServerMessage) : Void {
+  function notifyListeners(message : ServerMessage) : Void {
     for (listener in listeners) {
       listener(message);
     }
