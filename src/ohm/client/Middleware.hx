@@ -41,6 +41,7 @@ class Middleware {
   public function dataRequestMiddleware(action : Action, dispatch : Action -> Void) : Void {
     switch action {
       case AddressChanged(Lobby) :
+        trace('mw: AddressChanged(Lobby)');
         dispatch(GetUsers);
         dispatch(GetGames);
 
@@ -64,15 +65,19 @@ class Middleware {
       case CreateUserSuccess(user) : // no-op
       case CreateUserFailure(name, message) : // no-op
 
-      case GetUsers : socketClient.send(GetUsers);
+      case GetUsers :
+        trace('mw: socket GetUsers');
+        socketClient.send(GetUsers);
       case UsersUpdated(_): // no-op
       case GetUsersFailure(_): // no-op
 
-      case GetGames : socketClient.send(GetGames);
+      case GetGames :
+        trace('mw: socket GetGames');
+        socketClient.send(GetGames);
       case GamesUpdated(_): // no-op
       case GetGamesFailure(_): // no-op
 
-      case CreateGame(name) : socketClient.send(CreateGame(name));
+      case CreateGame(name, playerCount) : socketClient.send(CreateGame(name, playerCount));
       case CreateGameSuccess(game) : // no-op
       case CreateGameFailure(name, error) : // no-op
 
@@ -105,14 +110,18 @@ class Middleware {
 
       case UnexpectedFailure(message) : dispatch(UnexpectedFailure(message));
 
-      case UsersUpdated(users) : dispatch(UsersUpdated(users));
+      case UsersUpdated(users) :
+        trace('mw: server message UsersUpdated $users');
+        dispatch(UsersUpdated(users));
 
       case GetUsersFailure(message) : dispatch(GetUsersFailure(message));
 
       case CreateUserSuccess(user) : dispatch(CreateUserSuccess(user));
       case CreateUserFailure(name, message) : dispatch(CreateUserFailure(name, message));
 
-      case GamesUpdated(games) : dispatch(GamesUpdated(games));
+      case GamesUpdated(games) :
+        trace('mw: server message GamesUpdated $games');
+        dispatch(GamesUpdated(games));
 
       case GetGamesFailure(message) : dispatch(GetGamesFailure(message));
 

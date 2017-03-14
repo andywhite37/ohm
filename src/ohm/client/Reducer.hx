@@ -9,6 +9,7 @@ import ohm.client.view.LobbyView;
 
 class Reducer {
   public static function reduce(state : State, action : Action) : State {
+    trace('reduce $state $action');
     return switch action {
       case UnexpectedFailure(message) : unexpectedFailure(state, message);
 
@@ -17,17 +18,17 @@ class Reducer {
 
       case CreateUser(name) : createUser(state, name);
       case CreateUserSuccess(user) : createUserSuccess(state, user);
-      case CreateUserFailure(name, error) : createUserFailure(state, name, error);
+      case CreateUserFailure(name, message) : createUserFailure(state, name, message);
 
       case GetUsers: getUsers(state);
       case UsersUpdated(users) : usersUpdated(state, users);
-      case GetUsersFailure(error) : getUsersFailure(state, error);
+      case GetUsersFailure(message) : getUsersFailure(state, message);
 
       case GetGames : getGames(state);
       case GamesUpdated(games) : gamesUpdated(state, games);
-      case GetGamesFailure(error) : getGamesFailure(state, error);
+      case GetGamesFailure(message) : getGamesFailure(state, message);
 
-      case CreateGame(name) : createGame(state, name);
+      case CreateGame(name, playerCount) : createGame(state, name, playerCount);
       case CreateGameSuccess(game) : createGameSuccess(state, game);
       case CreateGameFailure(name, message) : createGameFailure(state, name, message);
 
@@ -66,14 +67,14 @@ class Reducer {
   static function addressChanged(state : State, address : Address) : State {
     // TODO
     return switch address {
-      case Lobby : state.withViewState(Lobby(new LobbyViewData(Loading, Loading, Loading)));
+      case Lobby : state.withViewState(Lobby(new LobbyViewData(Idle, Idle, Idle)));
       case Unknown(location) : state; // TODO
     }
   }
 
   static function createUser(state : State, name : String) : State {
     return switch state.viewState {
-      case Lobby(data) : state.withViewState(Lobby(data.withCurrentUserLoader(Loading)));
+      case Lobby(data) : state.withViewState(Lobby(data.withCurrentUserLoader(Loading('creating user...'))));
     }
   }
 
@@ -85,13 +86,13 @@ class Reducer {
 
   static function createUserFailure(state : State, name : String, message : String) : State {
     return switch state.viewState {
-      case Lobby(data) : state.withViewState(Lobby(data.withCurrentUserLoader(Failed('failed to create user $name'))));
+      case Lobby(data) : state.withViewState(Lobby(data.withCurrentUserLoader(Failed(message))));
     };
   }
 
   static function getUsers(state : State) : State {
     return switch state.viewState {
-      case Lobby(data) : state.withViewState(Lobby(data.withUsersLoader(Loading)));
+      case Lobby(data) : state.withViewState(Lobby(data.withUsersLoader(Loading('getting users...'))));
     }
   }
 
@@ -109,7 +110,7 @@ class Reducer {
 
   static function getGames(state : State) : State {
     return switch state.viewState {
-      case Lobby(data) : state.withViewState(Lobby(data.withGamesLoader(Loading)));
+      case Lobby(data) : state.withViewState(Lobby(data.withGamesLoader(Loading('getting games...'))));
     }
   }
 
@@ -119,19 +120,19 @@ class Reducer {
     }
   }
 
-  static function getGamesFailure(state : State, error : String) : State {
+  static function getGamesFailure(state : State, message : String) : State {
     return switch state.viewState {
-      case Lobby(data) : state.withViewState(Lobby(data.withGamesLoader(Failed(error))));
+      case Lobby(data) : state.withViewState(Lobby(data.withGamesLoader(Failed(message))));
     }
   }
 
-  static function createGame(state : State, name : String) : State {
-    // TODO
-    return state;
+  static function createGame(state : State, name : String, playerCount : Int) : State {
+    return switch state.viewState {
+      case Lobby(data) : state.withViewState(Lobby(data.withGamesLoader(Loading('creating game: $name...'))));
+    }
   }
 
   static function createGameSuccess(state : State, game : Game) : State {
-    // TODO
     return state;
   }
 
@@ -211,7 +212,6 @@ class Reducer {
   }
 
   static function gameUpdated(state : State, game : Game) : State {
-    // TODO
     return state;
   }
 }

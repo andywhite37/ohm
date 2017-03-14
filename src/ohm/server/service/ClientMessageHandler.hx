@@ -34,7 +34,7 @@ class ClientMessageHandler implements IClientMessageHandler {
       case CreateUser(name) : createUser(name);
       case GetUsers : getUsers();
       case GetGames : getGames();
-      case CreateGame(gameId) : createGame(gameId);
+      case CreateGame(name, playerCount) : createGame(name, playerCount);
       case JoinGame(gameId, userId) : joinGame(gameId, userId);
       case LeaveGame(gameId, userId) : leaveGame(gameId, userId);
       case RemoveGame(gameId) : removeGame(gameId);
@@ -76,8 +76,8 @@ class ClientMessageHandler implements IClientMessageHandler {
       });
   }
 
-  function createGame(name : String) : Promise<Array<Game>> {
-    return repository.createGame(name)
+  function createGame(name : String, playerCount : Int) : Promise<Array<Game>> {
+    return repository.createGame(name, playerCount)
       .flatMap(function(game : Game) {
         socketClient.sendClient(CreateGameSuccess(game));
         return repository.getGames();
@@ -90,12 +90,16 @@ class ClientMessageHandler implements IClientMessageHandler {
       });
   }
 
-  function joinGame(gameId : GameId, userId : UserId) : Promise<Game> {
+  function joinGame(gameId : GameId, userId : UserId) : Promise<Array<Game>> {
     return repository.joinGame(gameId, userId)
-      .success(function(game : Game) {
+      .flatMap(function(game : Game) {
         socketClient.joinRoom(gameId.toString());
         socketClient.sendClient(JoinGameSuccess(game));
         socketClient.sendRoomAll(gameId.toString(), GameUpdated(game));
+        return repository.getGames();
+      })
+      .success(function(games) {
+        socketClient.sendAll(GamesUpdated(games));
       })
       .failure(function(error) {
         socketClient.sendClient(JoinGameFailure(gameId, 'failed to join game: ${error.message}'));

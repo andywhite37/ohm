@@ -45,6 +45,7 @@ class IOSocketClient implements ISocketClient {
 
   public function connect() : Void {
     if (!isConnected()) {
+      trace('socket connect');
       var socket = IO.io(namespace);
       socket.on("server-message", onServerMessage);
       status = Connected(socket);
@@ -53,6 +54,7 @@ class IOSocketClient implements ISocketClient {
 
   public function disconnect() : Void {
     ifConnected(function(socket) {
+      trace('socket disconnect');
       socket.removeAllListeners();
       socket.disconnect();
       listeners = []; // TODO: should this be done?
@@ -62,11 +64,13 @@ class IOSocketClient implements ISocketClient {
 
   public function send(message : ClientMessage) : Void {
     ifConnected(function(socket) {
+      trace('socket send $message');
       socket.emit("client-message", Serializer.renderString(ClientMessages.schema(), message));
     });
   }
 
   function onServerMessage(data : String) : Void {
+    trace('socket onServerMessage $data');
     switch Serializer.parseString(ServerMessages.schema(), data).either {
       case Left(errors) : trace('failed to parse server message: $data');
       case Right(message) : notifyListeners(message);
@@ -75,6 +79,7 @@ class IOSocketClient implements ISocketClient {
 
   public function subscribe(listener : ServerMessage -> Void) : Void {
     if (!listeners.contains(listener)) {
+      trace('socket subscribe $listener');
       listeners.push(listener);
     }
   }

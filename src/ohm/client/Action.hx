@@ -23,7 +23,7 @@ enum Action {
   GamesUpdated(games : Array<Game>);
   GetGamesFailure(error : String);
 
-  CreateGame(name : String);
+  CreateGame(name : String, playerCount : Int);
   CreateGameSuccess(game : Game);
   CreateGameFailure(name : String, error : String);
 

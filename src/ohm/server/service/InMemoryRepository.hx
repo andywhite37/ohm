@@ -37,15 +37,20 @@ class InMemoryRepository implements IRepository {
     return Promise.value(games.values());
   }
 
-  public function createGame(name : String) : Promise<Game> {
-    return if (games.values().map.fn(_.name).contains(name)) {
-      Promise.fail('game $name already exists');
-    } else {
-      var gameId = GameId.gen();
-      var game = new Game(gameId, name, []);
-      games.set(game.id.toString(), game);
-      Promise.value(game);
+  public function createGame(name : String, playerCount : Int) : Promise<Game> {
+    if (games.values().map.fn(_.name).contains(name)) {
+      return Promise.fail('game $name already exists');
     }
+    if (playerCount < 5) {
+      return Promise.fail('game must have at least 5 players');
+    }
+    if (playerCount > 10) {
+      return Promise.fail('game must have at most 10 players');
+    }
+    var gameId = GameId.gen();
+    var game = new Game(gameId, name, playerCount, []);
+    games.set(game.id.toString(), game);
+    return Promise.value(game);
   }
 
   public function joinGame(gameId : GameId, userId : UserId) : Promise<Game> {
@@ -56,6 +61,9 @@ class InMemoryRepository implements IRepository {
     var user = users.get(userId.toString());
     if (game == null) {
       return Promise.fail('no user found for ID: ${userId.toString()}');
+    }
+    if (game.users.length >= game.playerCount) {
+      return Promise.fail('game is already full with ${game.playerCount} players');
     }
     var userInGame = game.users.any(function(gameUser) {
       return gameUser.id.toString() == user.id.toString();

@@ -4,7 +4,7 @@ import ohm.client.error.LoadError;
 
 enum Loader<T> {
   Idle;
-  Loading;
+  Loading(message : String);
   Loaded(data : T);
   Failed(message : String);
 }

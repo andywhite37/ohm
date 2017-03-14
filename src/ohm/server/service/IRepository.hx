@@ -10,7 +10,7 @@ interface IRepository {
   function createUser(name : String) : Promise<User>;
 
   function getGames() : Promise<Array<Game>>;
-  function createGame(name : String) : Promise<Game>;
+  function createGame(name : String, playerCount : Int) : Promise<Game>;
 
   function joinGame(gameId : GameId, userId : UserId) : Promise<Game>;
   function leaveGame(gameId : GameId, userId : UserId) : Promise<Game>;

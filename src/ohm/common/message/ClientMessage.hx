@@ -19,7 +19,7 @@ enum ClientMessage {
   CreateUser(name : String);
 
   GetGames;
-  CreateGame(name : String);
+  CreateGame(name : String, playerCount : Int);
   JoinGame(gameId : GameId, userId : UserId);
   LeaveGame(gameId : GameId, userId : UserId);
   RemoveGame(gameId : GameId);
@@ -75,14 +75,15 @@ class ClientMessages {
   static function createGameSchema() {
     return alt(
       "createGame",
-      object(ap1(
-        function(name : String) return { name: name },
-        required("name", string(), function(v : { name : String }) return v.name)
+      object(ap2(
+        function(name : String, playerCount : Int) return { name: name, playerCount: playerCount },
+        required("name", string(), function(v : { name : String, playerCount : Int }) return v.name),
+        required("playerCount", int(), function(v : { name : String, playerCount: Int }) return v.playerCount)
       )),
-      function(v : { name: String }) return CreateGame(v.name),
+      function(v : { name: String, playerCount: Int }) return CreateGame(v.name, v.playerCount),
       function(message : ClientMessage) {
         return switch message {
-          case CreateGame(name) : Some({ name: name });
+          case CreateGame(name, playerCount) : Some({ name: name, playerCount: playerCount });
           case _ : None;
         }
       }

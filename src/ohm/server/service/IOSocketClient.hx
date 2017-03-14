@@ -18,30 +18,37 @@ class IOSocketClient implements ISocketClient {
   }
 
   public function sendClient(message : ServerMessage) : Void {
-    socket.emit(serialize(message));
+    trace('sendClient $message');
+    socket.emit('server-message', serialize(message));
   }
 
   public function sendAll(message : ServerMessage) : Void {
-    io.emit(serialize(message));
+    trace('sendAll $message');
+    io.emit('server-message', serialize(message));
   }
 
   public function sendOthers(message : ServerMessage) : Void {
-    socket.broadcast.emit(serialize(message));
+    trace('sendOthers $message');
+    socket.broadcast.emit('server-message', serialize(message));
   }
 
   public function sendRoomAll(room : String, message : ServerMessage) : Void {
-    io.in_(room).emit(serialize(message));
+    trace('sendRoomAll $room $message');
+    io.in_(room).emit('server-message', serialize(message));
   }
 
   public function sendRoomOthers(room : String, message : ServerMessage) : Void {
-    socket.to(room).emit(serialize(message));
+    trace('sendRoomOthers $room $message');
+    socket.to(room).emit('server-message', serialize(message));
   }
 
   public function joinRoom(room : String) : Void {
+    trace('joinRoom');
     socket.join(room);
   }
 
   public function leaveRoom(room : String) {
+    trace('leaveRoom');
     socket.leave(room);
   }
 
